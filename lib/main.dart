@@ -67,8 +67,10 @@ class _MyAppState extends State<MyApp> {
         itemCount: currencies.length,
         itemBuilder: (context, index) {
           final currency = currencies[index];
+          final country = countries[index];
+          final flagUrl = country['flags']['png'];
           return ListTile(
-            leading: Icon(Icons.money),
+            leading: Image.network(flagUrl, width: 32, height: 32),
             title: Text(currency.toString()),
           );
         },
@@ -84,8 +86,10 @@ class _MyAppState extends State<MyApp> {
         itemCount: capitals.length,
         itemBuilder: (context, index) {
           final capital = capitals[index];
+          final country = countries[index];
+          final flagUrl = country['flags']['png'];
           return ListTile(
-            leading: Icon(Icons.location_city),
+            leading: Image.network(flagUrl, width: 32, height: 32),
             title: Text(capital.toString()),
           );
         },
@@ -138,4 +142,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
