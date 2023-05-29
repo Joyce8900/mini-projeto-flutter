@@ -25,7 +25,8 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> loadCountries() async {
     try {
-      final response = await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
+      final response =
+          await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
@@ -47,7 +48,9 @@ class _MyAppState extends State<MyApp> {
         itemCount: countries.length,
         itemBuilder: (context, index) {
           final country = countries[index];
+          final flagUrl = country['flags']['png'];
           return ListTile(
+            leading: Image.network(flagUrl, width: 32, height: 32),
             title: Text(country['name']['official']),
             subtitle: Text(country['name']['common']),
           );
@@ -65,6 +68,7 @@ class _MyAppState extends State<MyApp> {
         itemBuilder: (context, index) {
           final currency = currencies[index];
           return ListTile(
+            leading: Icon(Icons.money),
             title: Text(currency.toString()),
           );
         },
@@ -81,6 +85,7 @@ class _MyAppState extends State<MyApp> {
         itemBuilder: (context, index) {
           final capital = capitals[index];
           return ListTile(
+            leading: Icon(Icons.location_city),
             title: Text(capital.toString()),
           );
         },
