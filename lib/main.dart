@@ -15,12 +15,12 @@ class DataService {
   });
 
   void carregar(index) {
-    final funcoes = [carregarCafes, carregarCervejas, carregarNacoes];
+    final funcoes = [carregarBrasil, carregarCervejas, carregarNacoes];
 
     funcoes[index]();
   }
 
-  void carregarCafes() {
+  void carregarBrasil() {
     //ignorar solicitação se uma requisição já estiver em curso
 
     if (tableStateNotifier.value['status'] == TableStatus.loading) return;
@@ -55,7 +55,7 @@ class DataService {
         'status': TableStatus.ready,
         'dataObjects': coffeesJson,
         'propertyNames': ["blend_name", "origin", "variety"],
-        'columnNames': ["Nome", "Origem", "Tipo"]
+        'columnNames': ["Capital", "Idioma", "Moeda"]
       };
     });
   }
@@ -156,7 +156,7 @@ void main() {
 class MyApp extends StatelessWidget {
   final functionsMap = {
     ItemType.beer: dataService.carregarCervejas,
-    ItemType.coffee: dataService.carregarCafes,
+    ItemType.coffee: dataService.carregarBrasil,
     ItemType.nation: dataService.carregarNacoes
   };
 
