@@ -1,301 +1,183 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-enum TableStatus { idle, loading, ready, error }
-
-enum ItemType { beer, coffee, nation, none }
-
-class DataService {
-  final ValueNotifier<Map<String, dynamic>> tableStateNotifier = ValueNotifier({
-    'status': TableStatus.idle,
-    'dataObjects': [],
-    'itemType': ItemType.none
-  });
-
-  void carregar(index) {
-    final funcoes = [carregarBrasil, carregarCervejas, carregarNacoes];
-
-    funcoes[index]();
-  }
-
-  void carregarBrasil() {
-    //ignorar solicitação se uma requisição já estiver em curso
-
-    if (tableStateNotifier.value['status'] == TableStatus.loading) return;
-
-    if (tableStateNotifier.value['itemType'] != ItemType.coffee) {
-      tableStateNotifier.value = {
-        'status': TableStatus.loading,
-        'dataObjects': [],
-        'itemType': ItemType.coffee
-      };
-    }
-
-    var coffeesUri = Uri(
-        scheme: 'https',
-        host: 'random-data-api.com',
-        path: 'api/coffee/random_coffee',
-        queryParameters: {'size': '10'});
-
-    http.read(coffeesUri).then((jsonString) {
-      var coffeesJson = jsonDecode(jsonString);
-
-      //se já houver cafés no estado da tabela...
-
-      if (tableStateNotifier.value['status'] != TableStatus.loading)
-        coffeesJson = [
-          ...tableStateNotifier.value['dataObjects'],
-          ...coffeesJson
-        ];
-
-      tableStateNotifier.value = {
-        'itemType': ItemType.coffee,
-        'status': TableStatus.ready,
-        'dataObjects': coffeesJson,
-        'propertyNames': ["blend_name", "origin", "variety"],
-        'columnNames': ["Capital", "Idioma", "Moeda"]
-      };
-    });
-  }
-
-  void carregarNacoes() {
-    //ignorar solicitação se uma requisição já estiver em curso
-
-    if (tableStateNotifier.value['status'] == TableStatus.loading) return;
-
-    if (tableStateNotifier.value['itemType'] != ItemType.nation) {
-      tableStateNotifier.value = {
-        'status': TableStatus.loading,
-        'dataObjects': [],
-        'itemType': ItemType.nation
-      };
-    }
-
-    var nationsUri = Uri(
-        scheme: 'https',
-        host: 'random-data-api.com',
-        path: 'api/nation/random_nation',
-        queryParameters: {'size': '10'});
-
-    http.read(nationsUri).then((jsonString) {
-      var nationsJson = jsonDecode(jsonString);
-
-      //se já houver nações no estado da tabela...
-
-      if (tableStateNotifier.value['status'] != TableStatus.loading)
-        nationsJson = [
-          ...tableStateNotifier.value['dataObjects'],
-          ...nationsJson
-        ];
-
-      tableStateNotifier.value = {
-        'itemType': ItemType.nation,
-        'status': TableStatus.ready,
-        'dataObjects': nationsJson,
-        'propertyNames': [
-          "nationality",
-          "capital",
-          "language",
-          "national_sport"
-        ],
-        'columnNames': ["Nome", "Capital", "Idioma", "Esporte"]
-      };
-    });
-  }
-
-  void carregarCervejas() {
-    //ignorar solicitação se uma requisição já estiver em curso
-
-    if (tableStateNotifier.value['status'] == TableStatus.loading) return;
-
-    //emitir estado loading se items em exibição não forem cervejas
-
-    if (tableStateNotifier.value['itemType'] != ItemType.beer) {
-      tableStateNotifier.value = {
-        'status': TableStatus.loading,
-        'dataObjects': [],
-        'itemType': ItemType.beer
-      };
-    }
-
-    var beersUri = Uri(
-        scheme: 'https',
-        host: 'random-data-api.com',
-        path: 'api/beer/random_beer',
-        queryParameters: {'size': '10'});
-
-    http.read(beersUri).then((jsonString) {
-      var beersJson = jsonDecode(jsonString);
-
-      //se já houver cervejas no estado da tabela...
-
-      if (tableStateNotifier.value['status'] != TableStatus.loading)
-        beersJson = [...tableStateNotifier.value['dataObjects'], ...beersJson];
-
-      tableStateNotifier.value = {
-        'itemType': ItemType.beer,
-        'status': TableStatus.ready,
-        'dataObjects': beersJson,
-        'propertyNames': ["name", "style", "ibu"],
-        'columnNames': ["Nome", "Estilo", "IBU"]
-      };
-    });
-  }
-}
-
-final dataService = DataService();
-
 void main() {
-  MyApp app = MyApp();
-
-  runApp(app);
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  final functionsMap = {
-    ItemType.beer: dataService.carregarCervejas,
-    ItemType.coffee: dataService.carregarBrasil,
-    ItemType.nation: dataService.carregarNacoes
-  };
+class MyApp extends StatefulWidget {
+  @override
+  _MyAppState createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  int currentIndex = 0;
+  List<dynamic> countries = [];
+  List<dynamic> currencies = [];
+  List<dynamic> capitals = [];
+
+  @override
+  void initState() {
+    super.initState();
+    loadCountries();
+  }
+
+  Future<void> loadCountries() async {
+    try {
+      final response = await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          countries = data;
+          currencies = data.map((country) => country['currencies']).toList();
+          capitals = data.map((country) => country['capital']).toList();
+        });
+
+        // Traduzindo os nomes dos países
+        await translateCountryNames();
+      }
+    } catch (e) {
+      print('Error loading countries: $e');
+    }
+  }
+
+  Future<void> translateCountryNames() async {
+    for (var i = 0; i < countries.length; i++) {
+      final country = countries[i];
+      final name = country['name']['official'];
+      final translation = await _translateName(name);
+      setState(() {
+        countries[i]['name']['official'] = translation;
+      });
+    }
+  }
+
+  Future<String> _translateName(String name) async {
+    final response = await http.get(
+      Uri.parse('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt_BR&dt=t&q=${Uri.encodeQueryComponent(name)}'),
+    );
+
+    if (response.statusCode == 200) {
+      final translation = jsonDecode(response.body);
+      return translation[0][0][0];
+    } else {
+      throw Exception('Failed to translate text.');
+    }
+  }
+
+  Widget buildNationsPage() {
+    if (countries.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    } else {
+      return ListView.builder(
+        itemCount: countries.length,
+        itemBuilder: (context, index) {
+          final country = countries[index];
+          final flagUrl = country['flags']['png'];
+          final officialName = country['name']['official'];
+          final commonName = country['name']['common'];
+          return ListTile(
+            leading: Image.network(flagUrl, width: 32, height: 32),
+            title: FutureBuilder<String>(
+              future: _translateName(officialName),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text(snapshot.data!);
+                } else if (snapshot.hasError) {
+                  return Text('Translation Error');
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            ),
+            subtitle: Text(commonName),
+          );
+        },
+      );
+    }
+  }
+
+  Widget buildCurrenciesPage() {
+    if (currencies.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    } else {
+      return ListView.builder(
+        itemCount: currencies.length,
+        itemBuilder: (context, index) {
+          final currency = currencies[index];
+          final country = countries[index];
+          final flagUrl = country['flags']['png'];
+          return ListTile(
+            leading: Image.network(flagUrl, width: 32, height: 32),
+            title: Text(currency.toString()),
+          );
+        },
+      );
+    }
+  }
+
+  Widget buildCapitalsPage() {
+    if (capitals.isEmpty) {
+      return Center(child: CircularProgressIndicator());
+    } else {
+      return ListView.builder(
+        itemCount: capitals.length,
+        itemBuilder: (context, index) {
+          final capital = capitals[index];
+          final country = countries[index];
+          final flagUrl = country['flags']['png'];
+          return ListTile(
+            leading: Image.network(flagUrl, width: 32, height: 32),
+            title: Text(capital.toString()),
+          );
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        theme: ThemeData(primarySwatch: Colors.green),
-        debugShowCheckedModeBanner: false,
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text("Countries App"),
-          ),
-          body: ValueListenableBuilder(
-              valueListenable: dataService.tableStateNotifier,
-              builder: (_, value, __) {
-                switch (value['status']) {
-                  case TableStatus.idle:
-                    return Center(child: Text("Toque algum botão, abaixo..."));
-
-                  case TableStatus.loading:
-                    return Center(child: CircularProgressIndicator());
-
-                  case TableStatus.ready:
-                    return ListWidget(
-                      jsonObjects: value['dataObjects'],
-                      propertyNames: value['propertyNames'],
-                      scrollEndedCallback: functionsMap[value['itemType']],
-                    );
-
-                  case TableStatus.error:
-                    return Text("Lascou");
-                }
-
-                return Text("...");
-              }),
-          bottomNavigationBar:
-              NewNavBar(itemSelectedCallback: dataService.carregar),
-        ));
-  }
-}
-
-class NewNavBar extends HookWidget {
-  final _itemSelectedCallback;
-
-  NewNavBar({itemSelectedCallback})
-      : _itemSelectedCallback = itemSelectedCallback ?? (int) {}
-
-  @override
-  Widget build(BuildContext context) {
-    var state = useState(1);
-
-    return BottomNavigationBar(
-        onTap: (index) {
-          state.value = index;
-
-          _itemSelectedCallback(index);
-        },
-        currentIndex: state.value,
-        items: const [
-          BottomNavigationBarItem(
-            label: "Nações",
-            icon: Icon(Icons.flag_outlined),
-          ),
-          BottomNavigationBarItem(
-              label: "Moedas", icon: Icon(Icons.monetization_on)),
-          BottomNavigationBarItem(
-              label: "Capitais", icon: Icon(Icons.stars))
-        ]);
-  }
-}
-
-class ListWidget extends HookWidget {
-  final dynamic _scrollEndedCallback;
-
-  final List jsonObjects;
-
-  final List<String> propertyNames;
-
-  ListWidget(
-      {this.jsonObjects = const [],
-      this.propertyNames = const [],
-      void Function()? scrollEndedCallback})
-      : _scrollEndedCallback = scrollEndedCallback ?? false;
-
-  @override
-  Widget build(BuildContext context) {
-    var controller = useScrollController();
-
-    useEffect(() {
-      controller.addListener(
-        () {
-          if (controller.position.pixels ==
-              controller.position.maxScrollExtent) {
-            print('end reached');
-
-            if (_scrollEndedCallback is Function) _scrollEndedCallback();
-          }
-        },
-      );
-    }, [controller]);
-
-    return ListView.separated(
-      controller: controller,
-      padding: EdgeInsets.all(10),
-      separatorBuilder: (_, __) => Divider(
-        height: 5,
-        thickness: 2,
-        indent: 10,
-        endIndent: 10,
-        color: Theme.of(context).primaryColor,
+      title: 'Countries App',
+      theme: ThemeData(
+        primarySwatch: Colors.green,
       ),
-      itemCount: jsonObjects.length + 1,
-      itemBuilder: (_, index) {
-        if (index == jsonObjects.length)
-          return Center(child: LinearProgressIndicator());
-
-        var title = jsonObjects[index][propertyNames[0]];
-
-        var content = propertyNames
-            .sublist(1)
-            .map((prop) => jsonObjects[index][prop])
-            .join(" - ");
-
-        return Card(
-            shadowColor: Theme.of(context).primaryColor,
-            child: Column(children: [
-              SizedBox(height: 10),
-
-              //a primeira propriedade vai em negrito
-
-              Text("${title}\n", style: TextStyle(fontWeight: FontWeight.bold)),
-
-              //as demais vão normais
-
-              Text(content),
-
-              SizedBox(height: 10)
-            ]));
-      },
+      home: Scaffold(
+        appBar: AppBar(
+          title: Text('Countries App'),
+        ),
+        body: IndexedStack(
+          index: currentIndex,
+          children: [
+            buildNationsPage(),
+            buildCurrenciesPage(),
+            buildCapitalsPage(),
+          ],
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: currentIndex,
+          onTap: (index) {
+            setState(() {
+              currentIndex = index;
+            });
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.public),
+              label: 'Nations',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.money),
+              label: 'Currencies',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.location_city),
+              label: 'Capitals',
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
