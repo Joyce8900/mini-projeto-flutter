@@ -25,8 +25,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> loadCountries() async {
     try {
-      final response =
-          await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
+      final response = await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
@@ -34,9 +33,36 @@ class _MyAppState extends State<MyApp> {
           currencies = data.map((country) => country['currencies']).toList();
           capitals = data.map((country) => country['capital']).toList();
         });
+
+        // Traduzindo os nomes dos países
+        await translateCountryNames();
       }
     } catch (e) {
       print('Error loading countries: $e');
+    }
+  }
+
+  Future<void> translateCountryNames() async {
+    for (var i = 0; i < countries.length; i++) {
+      final country = countries[i];
+      final name = country['name']['official'];
+      final translation = await _translateName(name);
+      setState(() {
+        countries[i]['name']['official'] = translation;
+      });
+    }
+  }
+
+  Future<String> _translateName(String name) async {
+    final response = await http.get(
+      Uri.parse('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt_BR&dt=t&q=${Uri.encodeQueryComponent(name)}'),
+    );
+
+    if (response.statusCode == 200) {
+      final translation = jsonDecode(response.body);
+      return translation[0][0][0];
+    } else {
+      throw Exception('Failed to translate text.');
     }
   }
 
@@ -49,10 +75,23 @@ class _MyAppState extends State<MyApp> {
         itemBuilder: (context, index) {
           final country = countries[index];
           final flagUrl = country['flags']['png'];
+          final officialName = country['name']['official'];
+          final commonName = country['name']['common'];
           return ListTile(
             leading: Image.network(flagUrl, width: 32, height: 32),
-            title: Text(country['name']['official']),
-            subtitle: Text(country['name']['common']),
+            title: FutureBuilder<String>(
+              future: _translateName(officialName),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Text(snapshot.data!);
+                } else if (snapshot.hasError) {
+                  return Text('Translation Error');
+                } else {
+                  return CircularProgressIndicator();
+                }
+              },
+            ),
+            subtitle: Text(commonName),
           );
         },
       );
