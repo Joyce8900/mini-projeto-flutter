@@ -15,7 +15,7 @@ class _MyAppState extends State<MyApp> {
   int currentIndex = 0;
   List<dynamic> countries = [];
   List<dynamic> currencies = [];
-  List<dynamic> capitals = [];
+  List<dynamic> populations = [];
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           countries = data;
           currencies = data.map((country) => country['currencies']).toList();
-          capitals = data.map((country) => country['capital']).toList();
+          populations = data.map((country) => country['population']).toList();
         });
 
         // Traduzindo os nomes dos países
@@ -117,19 +117,19 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Widget buildCapitalsPage() {
-    if (capitals.isEmpty) {
+  Widget buildPopulationPage() {
+    if (populations.isEmpty) {
       return Center(child: CircularProgressIndicator());
     } else {
       return ListView.builder(
-        itemCount: capitals.length,
+        itemCount: populations.length,
         itemBuilder: (context, index) {
-          final capital = capitals[index];
+          final population = populations[index];
           final country = countries[index];
           final flagUrl = country['flags']['png'];
           return ListTile(
             leading: Image.network(flagUrl, width: 32, height: 32),
-            title: Text(capital.toString()),
+            title: Text(population.toString()),
           );
         },
       );
@@ -162,7 +162,7 @@ class _MyAppState extends State<MyApp> {
           children: [
             buildNationsPage(),
             buildCurrenciesPage(),
-            buildCapitalsPage(),
+            buildPopulationPage(),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -182,8 +182,8 @@ class _MyAppState extends State<MyApp> {
               label: 'Moeda',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.location_city),
-              label: 'Capitais',
+              icon: Icon(Icons.people),
+              label: 'População',
             ),
           ],
         ),
