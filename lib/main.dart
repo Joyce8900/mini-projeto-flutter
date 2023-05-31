@@ -25,8 +25,7 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> loadCountries() async {
     try {
-      final response =
-          await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
+      final response = await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
@@ -57,7 +56,8 @@ class _MyAppState extends State<MyApp> {
   Future<String> _translateName(String name) async {
     final response = await http.get(
       Uri.parse(
-          'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt_BR&dt=t&q=${Uri.encodeQueryComponent(name)}'),
+        'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt_BR&dt=t&q=${Uri.encodeQueryComponent(name)}',
+      ),
     );
 
     if (response.statusCode == 200) {
@@ -138,11 +138,13 @@ class _MyAppState extends State<MyApp> {
           final flagUrl = country['flags']['png'];
           return ListTile(
             leading: Image.network(flagUrl, width: 32, height: 32),
-            title: Text(currency != null && currency.isNotEmpty
-                ? currency.values
-                    .map((c) => "${c["name"]} ${c["symbol"]}")
-                    .join(" - ")
-                : "---"),
+            title: Text(
+              currency != null && currency.isNotEmpty
+                  ? currency.values
+                      .map((c) => "${c["name"]} ${c["symbol"]}")
+                      .join(" - ")
+                  : "---",
+            ),
           );
         },
       );
@@ -150,23 +152,33 @@ class _MyAppState extends State<MyApp> {
   }
 
   void loadCountriesForContinent(String continent) async {
+    String apiUrl;
     if (continent == 'Europa') {
-      final response = await http.get(Uri.parse('https://restcountries.com/v3.1/region/europe'));
+      apiUrl = 'https://restcountries.com/v3.1/region/europe';
+    } else if (continent == 'Ásia') {
+      apiUrl = 'https://restcountries.com/v3.1/region/asia';
+    } else if (continent == 'Oceania') {
+      apiUrl = 'https://restcountries.com/v2/region/oceania';
+    } else {
+      return;
+    }
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
           countries = data;
           currencies = data.map((country) => country['currencies']).toList();
           populations = data.map((country) => country['population']).toList();
+          currentIndex = 0; // Reset the current index to display the Nations page
         });
 
         // Traduzindo os nomes dos países
         await translateCountryNames();
-      } else {
-        print('Error loading countries: ${response.statusCode}');
       }
-    } else {
-      loadCountries();
+    } catch (e) {
+      print('Error loading countries for continent $continent: $e');
     }
   }
 
@@ -221,25 +233,9 @@ class _MyAppState extends State<MyApp> {
             children: [
               ListTile(
                 leading: Icon(Icons.language),
-                title: Text('América do Norte'),
+                title: Text('Europa'),
                 onTap: () {
-                  loadCountriesForContinent('North America');
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.language),
-                title: Text('América do Sul'),
-                onTap: () {
-                  loadCountriesForContinent('South America');
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.language),
-                title: Text('África'),
-                onTap: () {
-                  loadCountriesForContinent('Africa');
+                  loadCountriesForContinent('Europa');
                   Navigator.pop(context);
                 },
               ),
@@ -247,15 +243,7 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('Ásia'),
                 onTap: () {
-                  loadCountriesForContinent('Asia');
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.language),
-                title: Text('Europa'),
-                onTap: () {
-                  loadCountriesForContinent('Europa');
+                  loadCountriesForContinent('Ásia');
                   Navigator.pop(context);
                 },
               ),
