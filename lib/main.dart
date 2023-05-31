@@ -145,7 +145,7 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Countries App'),
+          title: Text('Exploração Geográfica'),
           leading: Builder(
             builder: (BuildContext context) {
               return IconButton(
@@ -175,15 +175,15 @@ class _MyAppState extends State<MyApp> {
           items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.public),
-              label: 'Nations',
+              label: 'Países',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.money),
-              label: 'Currencies',
+              label: 'Moeda',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.location_city),
-              label: 'Capitals',
+              label: 'Capitais',
             ),
           ],
         ),
