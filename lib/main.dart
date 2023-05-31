@@ -189,7 +189,62 @@ class _MyAppState extends State<MyApp> {
             ),
           ],
         ),
-        drawer: Drawer(),
+        drawer: Drawer(
+          child: ListView(
+            children: [
+             
+              
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('América do Norte'),
+                onTap: () {
+                  
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('América do Sul'),
+                onTap: () {
+                 
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('África'),
+                onTap: () {
+                  
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('Ásia'),
+                onTap: () {
+                  
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('Europa'),
+                onTap: () {
+                  
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('Oceania'),
+                onTap: () {
+                 
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
