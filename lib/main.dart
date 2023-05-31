@@ -146,6 +146,16 @@ class _MyAppState extends State<MyApp> {
       home: Scaffold(
         appBar: AppBar(
           title: Text('Countries App'),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
+            },
+          ),
         ),
         body: IndexedStack(
           index: currentIndex,
@@ -177,6 +187,7 @@ class _MyAppState extends State<MyApp> {
             ),
           ],
         ),
+        drawer: Drawer(),
       ),
     );
   }
