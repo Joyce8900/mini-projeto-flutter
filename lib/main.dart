@@ -66,6 +66,21 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  String formatPopulation(int population) {
+    if (population >= 1000000000) {
+      final billionPopulation = (population / 1000000000).toStringAsFixed(1);
+      return '$billionPopulation bilhões';
+    } else if (population >= 1000000) {
+      final millionPopulation = (population / 1000000).toStringAsFixed(1);
+      return '$millionPopulation milhões';
+    } else if (population >= 1000) {
+      final thousandPopulation = (population / 1000).toStringAsFixed(1);
+      return '$thousandPopulation mil';
+    } else {
+      return population.toString();
+    }
+  }
+
   Widget buildNationsPage() {
     if (countries.isEmpty) {
       return Center(child: CircularProgressIndicator());
@@ -77,13 +92,24 @@ class _MyAppState extends State<MyApp> {
           final flagUrl = country['flags']['png'];
           final officialName = country['name']['official'];
           final commonName = country['name']['common'];
+          final population = populations[index];
+          final formattedPopulation = formatPopulation(population);
           return ListTile(
             leading: Image.network(flagUrl, width: 32, height: 32),
             title: FutureBuilder<String>(
               future: _translateName(officialName),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return Text(snapshot.data!);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(snapshot.data!),
+                      Text(
+                        formattedPopulation,
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  );
                 } else if (snapshot.hasError) {
                   return Text('Translation Error');
                 } else {
@@ -117,25 +143,6 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Widget buildPopulationPage() {
-    if (populations.isEmpty) {
-      return Center(child: CircularProgressIndicator());
-    } else {
-      return ListView.builder(
-        itemCount: populations.length,
-        itemBuilder: (context, index) {
-          final population = populations[index];
-          final country = countries[index];
-          final flagUrl = country['flags']['png'];
-          return ListTile(
-            leading: Image.network(flagUrl, width: 32, height: 32),
-            title: Text(population.toString()),
-          );
-        },
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -162,7 +169,6 @@ class _MyAppState extends State<MyApp> {
           children: [
             buildNationsPage(),
             buildCurrenciesPage(),
-            buildPopulationPage(),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -180,10 +186,6 @@ class _MyAppState extends State<MyApp> {
             BottomNavigationBarItem(
               icon: Icon(Icons.money),
               label: 'Moeda',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.people),
-              label: 'População',
             ),
           ],
         ),
