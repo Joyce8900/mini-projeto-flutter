@@ -25,7 +25,8 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> loadCountries() async {
     try {
-      final response = await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
+      final response =
+          await http.get(Uri.parse('https://restcountries.com/v3.1/all'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
@@ -55,7 +56,8 @@ class _MyAppState extends State<MyApp> {
 
   Future<String> _translateName(String name) async {
     final response = await http.get(
-      Uri.parse('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt_BR&dt=t&q=${Uri.encodeQueryComponent(name)}'),
+      Uri.parse(
+          'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt_BR&dt=t&q=${Uri.encodeQueryComponent(name)}'),
     );
 
     if (response.statusCode == 200) {
@@ -134,9 +136,14 @@ class _MyAppState extends State<MyApp> {
           final currency = currencies[index];
           final country = countries[index];
           final flagUrl = country['flags']['png'];
+          //print(currency);
+          //print(currency.runtimeType);
+          //if (currency!=null) 
+          //  print(currency.values.map( (c) => "${c["name"]} ${c["symbol"]}" ).join(" - "));
           return ListTile(
             leading: Image.network(flagUrl, width: 32, height: 32),
-            title: Text(currency.toString()),
+            //title: Text("${currency?.values}"),
+            title: Text( currency == null ? "---" : currency.values.map( (c) => "${c["name"]} ${c["symbol"]}" ).join(" - ") ),
           );
         },
       );
@@ -192,13 +199,10 @@ class _MyAppState extends State<MyApp> {
         drawer: Drawer(
           child: ListView(
             children: [
-             
-              
               ListTile(
                 leading: Icon(Icons.language),
                 title: Text('América do Norte'),
                 onTap: () {
-                  
                   Navigator.pop(context);
                 },
               ),
@@ -206,7 +210,6 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('América do Sul'),
                 onTap: () {
-                 
                   Navigator.pop(context);
                 },
               ),
@@ -214,7 +217,6 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('África'),
                 onTap: () {
-                  
                   Navigator.pop(context);
                 },
               ),
@@ -222,7 +224,6 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('Ásia'),
                 onTap: () {
-                  
                   Navigator.pop(context);
                 },
               ),
@@ -230,7 +231,6 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('Europa'),
                 onTap: () {
-                  
                   Navigator.pop(context);
                 },
               ),
@@ -238,7 +238,6 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('Oceania'),
                 onTap: () {
-                 
                   Navigator.pop(context);
                 },
               ),
