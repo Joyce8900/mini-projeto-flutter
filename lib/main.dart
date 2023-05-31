@@ -136,17 +136,37 @@ class _MyAppState extends State<MyApp> {
           final currency = currencies[index];
           final country = countries[index];
           final flagUrl = country['flags']['png'];
-          //print(currency);
-          //print(currency.runtimeType);
-          //if (currency!=null) 
-          //  print(currency.values.map( (c) => "${c["name"]} ${c["symbol"]}" ).join(" - "));
           return ListTile(
             leading: Image.network(flagUrl, width: 32, height: 32),
-            //title: Text("${currency?.values}"),
-            title: Text( currency == null ? "---" : currency.values.map( (c) => "${c["name"]} ${c["symbol"]}" ).join(" - ") ),
+            title: Text(currency != null && currency.isNotEmpty
+                ? currency.values
+                    .map((c) => "${c["name"]} ${c["symbol"]}")
+                    .join(" - ")
+                : "---"),
           );
         },
       );
+    }
+  }
+
+  void loadCountriesForContinent(String continent) async {
+    if (continent == 'Europa') {
+      final response = await http.get(Uri.parse('https://restcountries.com/v3.1/region/europe'));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          countries = data;
+          currencies = data.map((country) => country['currencies']).toList();
+          populations = data.map((country) => country['population']).toList();
+        });
+
+        // Traduzindo os nomes dos países
+        await translateCountryNames();
+      } else {
+        print('Error loading countries: ${response.statusCode}');
+      }
+    } else {
+      loadCountries();
     }
   }
 
@@ -203,6 +223,7 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('América do Norte'),
                 onTap: () {
+                  loadCountriesForContinent('North America');
                   Navigator.pop(context);
                 },
               ),
@@ -210,6 +231,7 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('América do Sul'),
                 onTap: () {
+                  loadCountriesForContinent('South America');
                   Navigator.pop(context);
                 },
               ),
@@ -217,6 +239,7 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('África'),
                 onTap: () {
+                  loadCountriesForContinent('Africa');
                   Navigator.pop(context);
                 },
               ),
@@ -224,6 +247,7 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('Ásia'),
                 onTap: () {
+                  loadCountriesForContinent('Asia');
                   Navigator.pop(context);
                 },
               ),
@@ -231,6 +255,7 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('Europa'),
                 onTap: () {
+                  loadCountriesForContinent('Europa');
                   Navigator.pop(context);
                 },
               ),
@@ -238,6 +263,7 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('Oceania'),
                 onTap: () {
+                  loadCountriesForContinent('Oceania');
                   Navigator.pop(context);
                 },
               ),
