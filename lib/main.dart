@@ -15,7 +15,7 @@ class _MyAppState extends State<MyApp> {
   int currentIndex = 0;
   List<dynamic> countries = [];
   List<dynamic> currencies = [];
-  List<dynamic> capitals = [];
+  List<dynamic> populations = [];
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _MyAppState extends State<MyApp> {
         setState(() {
           countries = data;
           currencies = data.map((country) => country['currencies']).toList();
-          capitals = data.map((country) => country['capital']).toList();
+          populations = data.map((country) => country['population']).toList();
         });
 
         // Traduzindo os nomes dos países
@@ -55,7 +55,9 @@ class _MyAppState extends State<MyApp> {
 
   Future<String> _translateName(String name) async {
     final response = await http.get(
-      Uri.parse('https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt_BR&dt=t&q=${Uri.encodeQueryComponent(name)}'),
+      Uri.parse(
+        'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt_BR&dt=t&q=${Uri.encodeQueryComponent(name)}',
+      ),
     );
 
     if (response.statusCode == 200) {
@@ -63,6 +65,21 @@ class _MyAppState extends State<MyApp> {
       return translation[0][0][0];
     } else {
       throw Exception('Failed to translate text.');
+    }
+  }
+
+  String formatPopulation(int population) {
+    if (population >= 1000000000) {
+      final billionPopulation = (population / 1000000000).toStringAsFixed(1);
+      return '$billionPopulation bilhões';
+    } else if (population >= 1000000) {
+      final millionPopulation = (population / 1000000).toStringAsFixed(1);
+      return '$millionPopulation milhões';
+    } else if (population >= 1000) {
+      final thousandPopulation = (population / 1000).toStringAsFixed(1);
+      return '$thousandPopulation mil';
+    } else {
+      return population.toString();
     }
   }
 
@@ -77,13 +94,24 @@ class _MyAppState extends State<MyApp> {
           final flagUrl = country['flags']['png'];
           final officialName = country['name']['official'];
           final commonName = country['name']['common'];
+          final population = populations[index];
+          final formattedPopulation = formatPopulation(population);
           return ListTile(
             leading: Image.network(flagUrl, width: 32, height: 32),
             title: FutureBuilder<String>(
               future: _translateName(officialName),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
-                  return Text(snapshot.data!);
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(snapshot.data!),
+                      Text(
+                        formattedPopulation,
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  );
                 } else if (snapshot.hasError) {
                   return Text('Translation Error');
                 } else {
@@ -110,29 +138,47 @@ class _MyAppState extends State<MyApp> {
           final flagUrl = country['flags']['png'];
           return ListTile(
             leading: Image.network(flagUrl, width: 32, height: 32),
-            title: Text(currency.toString()),
+            title: Text(
+              currency != null && currency.isNotEmpty
+                  ? currency.values
+                      .map((c) => "${c["name"]} ${c["symbol"]}")
+                      .join(" - ")
+                  : "---",
+            ),
           );
         },
       );
     }
   }
 
-  Widget buildCapitalsPage() {
-    if (capitals.isEmpty) {
-      return Center(child: CircularProgressIndicator());
+  void loadCountriesForContinent(String continent) async {
+    String apiUrl;
+    if (continent == 'Europa') {
+      apiUrl = 'https://restcountries.com/v3.1/region/europe';
+    } else if (continent == 'Ásia') {
+      apiUrl = 'https://restcountries.com/v3.1/region/asia';
+    } else if (continent == 'Oceania') {
+      apiUrl = 'https://restcountries.com/v3.1/region/oceania';
     } else {
-      return ListView.builder(
-        itemCount: capitals.length,
-        itemBuilder: (context, index) {
-          final capital = capitals[index];
-          final country = countries[index];
-          final flagUrl = country['flags']['png'];
-          return ListTile(
-            leading: Image.network(flagUrl, width: 32, height: 32),
-            title: Text(capital.toString()),
-          );
-        },
-      );
+      return;
+    }
+
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          countries = data;
+          currencies = data.map((country) => country['currencies']).toList();
+          populations = data.map((country) => country['population']).toList();
+          currentIndex = 0; // Reset the current index to display the Nations page
+        });
+
+        // Traduzindo os nomes dos países
+        await translateCountryNames();
+      }
+    } catch (e) {
+      print('Error loading countries for continent $continent: $e');
     }
   }
 
@@ -145,14 +191,23 @@ class _MyAppState extends State<MyApp> {
       ),
       home: Scaffold(
         appBar: AppBar(
-          title: Text('Countries App'),
+          title: Text('Exploração Geográfica'),
+          leading: Builder(
+            builder: (BuildContext context) {
+              return IconButton(
+                icon: Icon(Icons.menu),
+                onPressed: () {
+                  Scaffold.of(context).openDrawer();
+                },
+              );
+            },
+          ),
         ),
         body: IndexedStack(
           index: currentIndex,
           children: [
             buildNationsPage(),
             buildCurrenciesPage(),
-            buildCapitalsPage(),
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -165,17 +220,43 @@ class _MyAppState extends State<MyApp> {
           items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.public),
-              label: 'Nations',
+              label: 'Países',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.money),
-              label: 'Currencies',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.location_city),
-              label: 'Capitals',
+              label: 'Moeda',
             ),
           ],
+        ),
+        drawer: Drawer(
+          child: ListView(
+            children: [
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('Europa'),
+                onTap: () {
+                  loadCountriesForContinent('Europa');
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('Ásia'),
+                onTap: () {
+                  loadCountriesForContinent('Ásia');
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('Oceania'),
+                onTap: () {
+                  loadCountriesForContinent('Oceania');
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
