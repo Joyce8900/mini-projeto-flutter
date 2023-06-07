@@ -141,7 +141,7 @@ class _MyAppState extends State<MyApp> {
             title: Text(
               currency != null && currency.isNotEmpty
                   ? currency.values
-                      .map((c) => "${c["name"]} ${c["symbol"]}")
+                      .map((c) => " Moeda: ${c["name"]} \n Símbolo: ${c["symbol"]} \n")
                       .join(" - ")
                   : "---",
             ),
