@@ -141,7 +141,7 @@ class _MyAppState extends State<MyApp> {
             title: Text(
               currency != null && currency.isNotEmpty
                   ? currency.values
-                      .map((c) => " Moeda: ${c["name"]} \n Símbolo: ${c["symbol"]} \n")
+                      .map((c) => "${c["name"]} ${c["symbol"]}")
                       .join(" - ")
                   : "---",
             ),
@@ -149,6 +149,15 @@ class _MyAppState extends State<MyApp> {
         },
       );
     }
+  }
+
+  Widget buildDevelopersPage() {
+    return Center(
+      child: Text(
+        'Página de Desenvolvedores',
+        style: TextStyle(fontSize: 24),
+      ),
+    );
   }
 
   void loadCountriesForContinent(String continent) async {
@@ -159,12 +168,11 @@ class _MyAppState extends State<MyApp> {
       apiUrl = 'https://restcountries.com/v3.1/region/asia';
     } else if (continent == 'Oceania') {
       apiUrl = 'https://restcountries.com/v3.1/region/oceania';
-    } else if  (continent == 'África'){
+    } else if (continent == 'África') {
       apiUrl = 'https://restcountries.com/v3.1/region/africa';
-    } else if (continent == 'América'){
+    } else if (continent == 'América') {
       apiUrl = 'https://restcountries.com/v3.1/region/america';
-    } 
-      else {
+    } else {
       return;
     }
 
@@ -213,6 +221,7 @@ class _MyAppState extends State<MyApp> {
           children: [
             buildNationsPage(),
             buildCurrenciesPage(),
+            buildDevelopersPage(), // Página de Desenvolvedores adicionada
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -230,6 +239,10 @@ class _MyAppState extends State<MyApp> {
             BottomNavigationBarItem(
               icon: Icon(Icons.money),
               label: 'Moeda',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.developer_mode), // Ícone para a página de desenvolvedores
+              label: 'Desenvolvedores', // Rótulo para a página de desenvolvedores
             ),
           ],
         ),
