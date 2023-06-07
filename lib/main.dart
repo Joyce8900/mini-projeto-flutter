@@ -158,7 +158,11 @@ class _MyAppState extends State<MyApp> {
     } else if (continent == 'Ásia') {
       apiUrl = 'https://restcountries.com/v3.1/region/asia';
     } else if (continent == 'Oceania') {
-      apiUrl = 'https://restcountries.com/v2/region/oceania';
+      apiUrl = 'https://restcountries.com/v3.1/region/oceania';
+    } else if  (continent == 'África'){
+      apiUrl = 'https://restcountries.com/v3.1/region/africa';
+    } else if (continent == 'América do Sul'){
+      apiUrl = 'https://restcountries.com/v3.1/subregion/south%20america';
     } else {
       return;
     }
@@ -235,24 +239,50 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('Europa'),
                 onTap: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
                   loadCountriesForContinent('Europa');
-                  Navigator.pop(context);
                 },
               ),
               ListTile(
                 leading: Icon(Icons.language),
                 title: Text('Ásia'),
                 onTap: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
                   loadCountriesForContinent('Ásia');
-                  Navigator.pop(context);
                 },
               ),
               ListTile(
                 leading: Icon(Icons.language),
                 title: Text('Oceania'),
                 onTap: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
                   loadCountriesForContinent('Oceania');
-                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('África'),
+                onTap: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
+                  loadCountriesForContinent('África');
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.language),
+                title: Text('América do Sul'),
+                onTap: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
+                  loadCountriesForContinent('América do Sul');
                 },
               ),
             ],
