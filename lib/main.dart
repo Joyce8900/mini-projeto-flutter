@@ -161,9 +161,10 @@ class _MyAppState extends State<MyApp> {
       apiUrl = 'https://restcountries.com/v3.1/region/oceania';
     } else if  (continent == 'África'){
       apiUrl = 'https://restcountries.com/v3.1/region/africa';
-    } else if (continent == 'América do Sul'){
-      apiUrl = 'https://restcountries.com/v3.1/subregion/south%20america';
-    } else {
+    } else if (continent == 'América'){
+      apiUrl = 'https://restcountries.com/v3.1/region/america';
+    } 
+      else {
       return;
     }
 
@@ -277,12 +278,12 @@ class _MyAppState extends State<MyApp> {
               ),
               ListTile(
                 leading: Icon(Icons.language),
-                title: Text('América do Sul'),
+                title: Text('América'),
                 onTap: () {
                   if (Navigator.canPop(context)) {
                     Navigator.pop(context);
                   }
-                  loadCountriesForContinent('América do Sul');
+                  loadCountriesForContinent('América');
                 },
               ),
             ],
