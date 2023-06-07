@@ -1,4 +1,4 @@
-# flutter_application_1
+# Mini-Projeto-Flutter
 
 A new Flutter project.
 

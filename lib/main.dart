@@ -163,8 +163,7 @@ class _MyAppState extends State<MyApp> {
       apiUrl = 'https://restcountries.com/v3.1/region/africa';
     } else if (continent == 'América do Sul'){
       apiUrl = 'https://restcountries.com/v3.1/subregion/south%20america';
-    }
-      else {
+    } else {
       return;
     }
 
