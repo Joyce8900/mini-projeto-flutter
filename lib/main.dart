@@ -151,15 +151,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  Widget buildDevelopersPage() {
-    return Center(
-      child: Text(
-        'Página de Desenvolvedores',
-        style: TextStyle(fontSize: 24),
-      ),
-    );
-  }
-
+  
   void loadCountriesForContinent(String continent) async {
     String apiUrl;
     if (continent == 'Europa') {
@@ -194,6 +186,31 @@ class _MyAppState extends State<MyApp> {
       print('Error loading countries for continent $continent: $e');
     }
   }
+
+  Widget buildDevelopersPage() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          'Desenvolvedores:',
+          style: TextStyle(fontSize: 24),
+        ),
+        SizedBox(height: 20),
+        Text(
+          'Gabriel José - gabriel.aquino.069@ufrn.edu.br',
+          style: TextStyle(fontSize: 16),
+        ),
+        SizedBox(height: 10),
+        Text(
+          'Joyce Santos - joyce.santos.709@ufrn.edu.br',
+          style: TextStyle(fontSize: 16),
+        ),
+      ],
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
