@@ -235,26 +235,33 @@ class _MyAppState extends State<MyApp> {
                 leading: Icon(Icons.language),
                 title: Text('Europa'),
                 onTap: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
                   loadCountriesForContinent('Europa');
-                  Navigator.pop(context);
                 },
               ),
               ListTile(
                 leading: Icon(Icons.language),
                 title: Text('Ásia'),
                 onTap: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
                   loadCountriesForContinent('Ásia');
-                  Navigator.pop(context);
                 },
               ),
               ListTile(
                 leading: Icon(Icons.language),
                 title: Text('Oceania'),
                 onTap: () {
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
                   loadCountriesForContinent('Oceania');
-                  Navigator.pop(context);
                 },
               ),
+
             ],
           ),
         ),
