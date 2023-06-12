@@ -1,16 +1,20 @@
 # Mini-Projeto-Flutter
 
-A new Flutter project.
+Projeto consiste na exibição de países, e suas respectivas moedas oficiais, junto com um menu "sanduiche" com a opção de exibir somente o continente escolhido. 
 
-## Getting Started
+Para a eleboração deste, foram utilizadas as seguintes API's:
 
-This project is a starting point for a Flutter application.
+### [Translate](https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt_BR&dt=t&q=${Uri.encodeQueryComponent(name)})
+### [Restcountries](https://restcountries.com/v3.1/all)
 
-A few resources to get you started if this is your first Flutter project:
+# Link
+Utilizando a ferramenta [Zapp](zapp.run) 
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Link do app:
+- [Exploração Geográfica](https://z1cu06x71cv0.zapp.page/#/)
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# Documentação
+
+Para obter ajuda para começar com o desenvolvimento do Flutter, veja o
+[documentação online](https://docs.flutter.dev/), que oferece tutoriais,
+amostras, orientação sobre desenvolvimento móvel e uma referência completa da API.
